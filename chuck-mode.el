@@ -52,6 +52,7 @@
 ;;; Code:
 
 (require 'custom)
+(require 'hl-line)
 
 ;;; Customizable variables
 
@@ -83,6 +84,16 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
   :type 'string
   :group 'chuck)
 
+(defcustom chuck-console-buffer-name "ChucK console"
+  "ChucK console buffer name."
+  :type 'string
+  :group 'chuck)
+
+(defconst chuck-console-list-format
+  [("ID" 10 t)
+   ("Name" 35 t)]
+  "List format.")
+
 ;; mode hook for user defined actions
 (defvar chuck-mode-hook nil)
 
@@ -97,19 +108,32 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 (defvar chuck-save-error
   "You need to save the buffer before sending it.")
 
-(defvar chuck-status-regex "^[[:space:]]+\\[shred id\\]: \\([[:digit:]]+\\)[[:space:]]+.*?: \\(\\w+\\.ck\\)[[:space:]].*$")
+(defvar chuck-status-regex
+  "^[[:space:]]+\\[shred id\\]:[[:space:]]+\\([[:digit:]]+\\)[[:space:]]+\\[source\\]:[[:space:]]+\\(.*?\\)[[:space:]]+.*$")
+
+
+(defun refresh-chuck-console ()
+  "Refresh ChucK console buffer."
+  (with-current-buffer chuck-console-buffer-name
+    (tabulated-list-print :remember-pos)
+    (hl-line-highlight)))
 
 (defun run-chuck ()
   "Start the ChucK VM as an inferior process."
   (interactive)
   (start-process chuck-process-name chuck-buffer-name chuck-exec "--loop")
-  (let ((new-window (split-window-below)))
-    (set-window-buffer new-window chuck-buffer-name)))
+  (let ((new-window (split-window-below))
+        (chuck-console-buffer (get-buffer-create chuck-console-buffer-name)))
+    (set-window-buffer new-window chuck-console-buffer)
+    (with-current-buffer chuck-console-buffer
+      (funcall 'chuck-console-mode))))
 
 (defun kill-chuck ()
   "Kill the ChucK VM."
   (interactive)
-  (chuck-cmd "--kill"))
+  (chuck-cmd "--kill")
+  (with-current-buffer chuck-console-buffer-name
+    (kill-buffer-and-window)))
 
 (defun chuck-add-current-buffer ()
   "Add a current buffer as a shred to the ChucK VM."
@@ -118,7 +142,8 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
   (when chuck-auto-save-buffer
     (save-buffer))
   (let ((chuck-file (file-name-nondirectory buffer-file-name)))
-      (chuck-cmd "+" chuck-file)))
+    (chuck-cmd "+" chuck-file)
+    (refresh-chuck-console)))
 
 (defun chuck-remove-shred (shred-id)
   "Remove a SHRED-ID associated with current buffer."
@@ -128,13 +153,15 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
       (chuck-cmd "-" (number-to-string (prefix-numeric-value shred-id)))
     (let* ((status (chuck-status))
            (buffer-shred (assoc (buffer-name) status)))
-      (chuck-cmd "-" (cdr buffer-shred)))))
+      (chuck-cmd "-" (cdr buffer-shred))
+      (refresh-chuck-console))))
 
 (defun chuck-remove-all ()
   "Remove all currently running shreds."
   (interactive)
   (ensure-chuck-is-running)
-  (chuck-cmd "--remove.all"))
+  (chuck-cmd "--remove.all")
+  (refresh-chuck-console))
 
 (defun chuck-replace-shred (shred-id)
   "Replace a SHRED-ID associated with current buffer."
@@ -142,10 +169,13 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
   (ensure-chuck-is-running)
   (let ((chuck-file (file-name-nondirectory buffer-file-name)))
     (if shred-id
-        (chuck-cmd "=" (concat (number-to-string (prefix-numeric-value shred-id)) " " chuck-file))
+        (progn
+          (chuck-cmd "=" (concat (number-to-string (prefix-numeric-value shred-id)) " " chuck-file))
+          (refresh-chuck-console))
       (let* ((status (chuck-status))
              (buffer-shred (assoc (buffer-name) status)))
-        (chuck-cmd "=" (concat (cdr buffer-shred) " " (car buffer-shred)))))))
+        (chuck-cmd "=" (concat (cdr buffer-shred) " " (car buffer-shred)))
+        (refresh-chuck-console)))))
 
 (defun parse-chuck-status (status-string)
   "Parse ChucK STATUS-STRING."
@@ -432,6 +462,28 @@ upchuck operator."
 	chuck-mode-syntax-table))
 
 ;; Entry point
+(defun chuck-console-list-entries ()
+  "Get entries for ChucK console."
+  (-map
+   (lambda (entry)
+     (let ((shred-id (cdr entry))
+           (buffer-name (car entry)))
+       (list shred-id (vector shred-id buffer-name))))
+   (chuck-status)))
+
+(define-derived-mode chuck-console-mode tabulated-list-mode "ChucK"
+  "Special mode for ChucK VM console."
+  (buffer-disable-undo)
+  (kill-all-local-variables)
+  (setq truncate-lines t)
+  (setq mode-name "ChucK")
+  (setq major-mode 'chuck-console-mode)
+  (setq tabulated-list-format chuck-console-list-format)
+  (setq tabulated-list-entries 'chuck-console-list-entries)
+  (tabulated-list-init-header)
+  (tabulated-list-print)
+  (hl-line-mode 1))
+
 (defun chuck-mode ()
   "Major mode for editing ChucK music/audio scripts."
   (interactive)
