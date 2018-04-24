@@ -42,12 +42,15 @@
   :group 'chuck)
 
 (defconst chuck-console-list-format
-  [("ID" 10 t)
-   ("Name" 35 t)]
+  [("[marked]" 10 t)
+   ("[shred id]" 15 t)
+   ("[source]" 35 t)
+   ("[spork time]" 35 nil)]
   "ChucK console list format.")
 
 (defun chuck-console-create ()
   "Create ChucK console."
+  ;;; TODO: check for existing buffer
   (let ((new-window (split-window-below))
         (chuck-console-buffer (get-buffer-create chuck-console-buffer-name)))
     (set-window-buffer new-window chuck-console-buffer)
@@ -71,21 +74,32 @@
    (lambda (entry)
      (let ((shred (cdr entry))
            (buf-name (car entry)))
-       (print (concat buf-name "#" shred))
-       (list shred (vector shred buf-name))))
+       (list shred (vector "" shred buf-name "100years ago"))))
    (chuck-status)))
 
 (defun chuck-console-shred-at-pos (&optional pos)
   "Get shred at POS."
-  (assoc (chuck-status) (tabulated-list-get-id pos)))
+  (tabulated-list-get-id pos))
 
-(defun chuck-console-mark-shred ())
+(defun chuck-console-reload-shred ()
+  "Reload selected shred."
+  (interactive)
+  (let* ((shred (chuck-console-shred-at-pos))
+         (source (chuck-get-source-by-shred shred))
+         (filename (buffer-file-name (get-file-buffer source))))
+    (print (concat "#" shred " source = " source " filename = " filename))
+    (chuck-replace-shred shred filename)
+    (chuck-console-refresh)))
 
-(defun chuck-console-remove-shred ())
+(defun chuck-console-remove-shred ()
+  "Remove selected shred."
+  (interactive)
+  (chuck-remove-shred (chuck-console-shred-at-pos))
+  (chuck-console-refresh))
 
 (defvar chuck-console-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "m") 'chuck-console-mark-shred)
+    (define-key map (kbd "r") 'chuck-console-reload-shred)
     (define-key map (kbd "x") 'chuck-console-remove-shred)
     map)
   "Keymap for ChucK console mode.")
@@ -97,6 +111,7 @@
   (setq truncate-lines t)
   (setq mode-name "ChucK console")
   (setq major-mode 'chuck-console-mode)
+  (use-local-map chuck-console-mode-map)
   (setq tabulated-list-format chuck-console-list-format)
   (setq tabulated-list-entries 'chuck-console-list-entries)
   (tabulated-list-init-header)

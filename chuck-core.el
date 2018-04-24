@@ -29,7 +29,9 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 
 (defun chuck-cmd (cmd &optional arg)
   "Sends a CMD with optional ARG to chuck."
-  (shell-command (concat chuck-exec " " cmd  " " (or arg ""))))
+  (let ((cmd-line (concat chuck-exec " " cmd  " " (or arg ""))))
+    (print cmd-line)
+    (shell-command cmd-line)))
 
 (defvar chuck-status-regex
   "^[[:space:]]+\\[shred id\\]:[[:space:]]+\\([[:digit:]]+\\)[[:space:]]+\\[source\\]:[[:space:]]+\\(.*?\\)[[:space:]]+.*$")
@@ -80,7 +82,7 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 (defun chuck-replace-shred (shred filename)
   "Replace a SHRED with contents of FILENAME."
   (ensure-chuck-is-running)
-  (chuck-cmd (concat "=" shred " " filename)))
+  (chuck-cmd "=" (concat shred " " filename)))
 
 (defun chuck-parse-status (status)
   "Parse ChucK STATUS."
@@ -94,7 +96,11 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 
 (defun chuck-get-shred-by-name (name)
   "Get shred id by it's NAME."
-  (assoc name (chuck-status)))
+  (cdr (assoc name (chuck-status))))
+
+(defun chuck-get-source-by-shred (shred)
+  "Get source by SHRED id."
+  (car (rassoc shred (chuck-status))))
 
 (provide 'chuck-core)
 ;;; chuck-core.el ends here

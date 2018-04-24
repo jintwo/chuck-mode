@@ -100,7 +100,7 @@
   (interactive "P")
   (if shred
       (chuck-replace-shred (number-to-string (prefix-numeric-value shred)) buffer-file-name)
-    (chuck-replace-shred (chuck-get-shred-by-name (file-name-nondirectory buffer-file-name))))
+    (chuck-replace-shred (chuck-get-shred-by-name (file-name-nondirectory buffer-file-name)) buffer-file-name))
   (chuck-console-refresh))
 
 (defun kill-shred (shred)
