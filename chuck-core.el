@@ -30,17 +30,21 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 (defun chuck-cmd (cmd &optional arg)
   "Sends a CMD with optional ARG to chuck."
   (let ((cmd-line (concat chuck-exec " " cmd  " " (or arg ""))))
-    (print cmd-line)
+    ;; (print cmd-line)
     (shell-command cmd-line)))
 
 (defvar chuck-status-regex
-  "^[[:space:]]+\\[shred id\\]:[[:space:]]+\\([[:digit:]]+\\)[[:space:]]+\\[source\\]:[[:space:]]+\\(.*?\\)[[:space:]]+.*$")
+  "^[[:space:]]+\\[shred id\\]:[[:space:]]+\\([[:digit:]]+\\)[[:space:]]+\\[source\\]:[[:space:]]+\\(.*?\\)[[:space:]]\\{2\\}\\[spork time\\]:[[:space:]]\\(.*\\)$")
 
 ;; ChucK mode internals
 (defun ensure-chuck-is-running ()
   "Ensure ChucK process is running."
-  (when (not (get-process chuck-process-name))
+  (when (not (chuck-is-running?))
     (chuck-run)))
+
+(defun chuck-is-running? ()
+  "Is ChucK running?."
+  (get-process chuck-process-name))
 
 (defun chuck-run ()
   "Start the ChucK VM as an inferior process."
@@ -48,7 +52,10 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 
 (defun chuck-kill ()
   "Kill the ChucK VM."
-  (chuck-cmd "--kill"))
+  (when (chuck-is-running?)
+    (chuck-cmd "--kill")
+    (with-current-buffer chuck-buffer-name
+      (kill-buffer-and-window))))
 
 (defun chuck-status ()
   "Tell ChucK to report status."
@@ -91,16 +98,20 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
     (-map
      (lambda (line)
        (string-match chuck-status-regex line)
-       (cons (match-string 2 line) (match-string 1 line)))
+       (list :shred (match-string 1 line)
+             :source (match-string 2 line)
+             :time (match-string 3 line)))
      status-lines)))
 
-(defun chuck-get-shred-by-name (name)
-  "Get shred id by it's NAME."
-  (cdr (assoc name (chuck-status))))
+(defun chuck-get-shred-by-source (source)
+  "Get shred id by it's SOURCE."
+  (when-let ((entry (-first (lambda (e) (string= (plist-get e :source) source)) (chuck-status))))
+    (plist-get entry :shred)))
 
 (defun chuck-get-source-by-shred (shred)
   "Get source by SHRED id."
-  (car (rassoc shred (chuck-status))))
+  (when-let ((entry (-first (lambda (e) (string= (plist-get e :shred) shred)) (chuck-status))))
+    (plist-get entry :source)))
 
 (provide 'chuck-core)
 ;;; chuck-core.el ends here

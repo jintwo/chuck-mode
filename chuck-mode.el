@@ -92,6 +92,9 @@
   (interactive)
   (when chuck-auto-save-buffer
     (save-buffer))
+  (when (not (chuck-is-running?))
+    (start-chuck)
+    (sleep-for 0 100))
   (chuck-add buffer-file-name)
   (chuck-console-refresh))
 
@@ -100,7 +103,7 @@
   (interactive "P")
   (if shred
       (chuck-replace-shred (number-to-string (prefix-numeric-value shred)) buffer-file-name)
-    (chuck-replace-shred (chuck-get-shred-by-name (file-name-nondirectory buffer-file-name)) buffer-file-name))
+    (chuck-replace-shred (chuck-get-shred-by-source (file-name-nondirectory buffer-file-name)) buffer-file-name))
   (chuck-console-refresh))
 
 (defun kill-shred (shred)
@@ -108,7 +111,7 @@
   (interactive "P")
   (if shred
       (chuck-remove-shred (number-to-string (prefix-numeric-value shred)))
-    (chuck-remove-shred (chuck-get-shred-by-name (file-name-nondirectory buffer-file-name))))
+    (chuck-remove-shred (chuck-get-shred-by-source (file-name-nondirectory buffer-file-name))))
   (chuck-console-refresh))
 
 (defun kill-all-shreds ()

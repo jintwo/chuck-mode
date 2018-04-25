@@ -50,20 +50,26 @@
 
 (defun chuck-console-create ()
   "Create ChucK console."
-  ;;; TODO: check for existing buffer
-  (let ((new-window (split-window-below))
-        (chuck-console-buffer (get-buffer-create chuck-console-buffer-name)))
-    (set-window-buffer new-window chuck-console-buffer)
-    (with-current-buffer chuck-console-buffer
-      (funcall 'chuck-console-mode))))
+  (let* ((chuck-console-buffer (get-buffer-create chuck-console-buffer-name))
+         (buffer-window (get-buffer-window chuck-console-buffer)))
+    (if buffer-window
+        (display-buffer chuck-console-buffer)
+      (let ((new-window (split-window-below)))
+        (set-window-buffer new-window chuck-console-buffer)
+        (with-current-buffer chuck-console-buffer
+          (funcall 'chuck-console-mode))))))
 
 (defun chuck-console-kill ()
   "Kill ChucK console."
+  (interactive)
+  (when (chuck-is-running?)
+    (chuck-kill))
   (with-current-buffer chuck-console-buffer-name
     (kill-buffer-and-window)))
 
 (defun chuck-console-refresh ()
   "Refresh ChucK console buffer."
+  (interactive)
   (with-current-buffer chuck-console-buffer-name
     (tabulated-list-print :remember-pos)
     (hl-line-highlight)))
@@ -72,9 +78,10 @@
   "Get entries for ChucK console."
   (-map
    (lambda (entry)
-     (let ((shred (cdr entry))
-           (buf-name (car entry)))
-       (list shred (vector "" shred buf-name "100years ago"))))
+     (let ((shred (plist-get entry :shred))
+           (source (plist-get entry :source))
+           (time (plist-get entry :time)))
+       (list shred (vector "" shred source time))))
    (chuck-status)))
 
 (defun chuck-console-shred-at-pos (&optional pos)
@@ -87,7 +94,6 @@
   (let* ((shred (chuck-console-shred-at-pos))
          (source (chuck-get-source-by-shred shred))
          (filename (buffer-file-name (get-file-buffer source))))
-    (print (concat "#" shred " source = " source " filename = " filename))
     (chuck-replace-shred shred filename)
     (chuck-console-refresh)))
 
@@ -99,8 +105,10 @@
 
 (defvar chuck-console-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "r") 'chuck-console-reload-shred)
     (define-key map (kbd "x") 'chuck-console-remove-shred)
+    (define-key map (kbd "r") 'chuck-console-reload-shred)
+    (define-key map (kbd "R") 'chuck-console-refresh)
+    (define-key map (kbd "Q") 'chuck-console-kill)
     map)
   "Keymap for ChucK console mode.")
 
