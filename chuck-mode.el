@@ -158,102 +158,106 @@
 (defconst chuck-font-lock-keywords-1
   (list
    (cons (keyword-regexp
-	  ;; Primitive types
-	  "int" "float" "time" "dur" "void" "same"
-	  ;; Reference types
-	  "Object" "array" "Event" "UGen" "string"
-	  ;; Complex types
-	  "polar" "complex"
-	  ;; standard ChucK unit generators:
-	  "SinOsc" "PulseOsc" "SqrOsc" "TriOsc"
-	  "SawOsc" "Phasor" "Noise" "Impulse"
-	  "Step" "Gain" "SndBuf" "HalfRect"
-	  "FullRect" "ZeroX" "Mix2" "Pan2"
-	  "GenX" "CurveTable" "WarpTable" "LiSa"
-	  ;; filters:
-	  "OneZero" "TwoZero" "OnePole" "TwoPole"
-	  "PoleZero" "BiQuad" "Filter" "LPF"
-	  "HPF" "BPF" "BRF" "ResonZ" "Dyno"
-	  ;; STK unit generators in ChucK:
-	  "Envelope" "ADSR" "Delay" "DelayA" "DelayL"
-	  "Echo" "JCRev" "NRev" "PRCRev" "Chorus"
-	  "Modulate" "PitShift" "SubNoise" "Blit"
-	  "BlitSaw" "BlitSquare" "WvIn" "WaveLoop"
-	  "WvOut"
-	  ;; STK instruments unit generators
-	  "StkInstrument" "BandedWG" "BlowBotl"
-	  "BlowHole" "Bowed" "Brass" "Clarinet"
-	  "Flute" "Mandolin" "ModalBar" "Moog"
-	  "Saxofony" "Shakers" "Sitar" "StifKarp"
-	  "VoicForm" "FM" "BeeThree" "FMVoices"
-	  "HevyMetl" "PercFlut" "Rhodey"
-	  "TubeBell" "Wurley")
-	 'font-lock-type-face)
+          ;; Primitive types
+          "int" "float" "time" "dur" "void" "same"
+          ;; Reference types
+          "Object" "array" "Event" "UGen" "string"
+          ;; Complex types
+          "polar" "complex"
+          ;; standard ChucK unit generators:
+          "SinOsc" "PulseOsc" "SqrOsc" "TriOsc"
+          "SawOsc" "Phasor" "Noise" "Impulse"
+          "Step" "Gain" "SndBuf" "HalfRect"
+          "FullRect" "ZeroX" "Mix2" "Pan2"
+          "GenX" "CurveTable" "WarpTable" "LiSa"
+          ;; filters:
+          "OneZero" "TwoZero" "OnePole" "TwoPole"
+          "PoleZero" "BiQuad" "Filter" "LPF"
+          "HPF" "BPF" "BRF" "ResonZ" "Dyno"
+          ;; STK unit generators in ChucK:
+          "Envelope" "ADSR" "Delay" "DelayA" "DelayL"
+          "Echo" "JCRev" "NRev" "PRCRev" "Chorus"
+          "Modulate" "PitShift" "SubNoise" "Blit"
+          "BlitSaw" "BlitSquare" "WvIn" "WaveLoop"
+          "WvOut"
+          ;; STK instruments unit generators
+          "StkInstrument" "BandedWG" "BlowBotl"
+          "BlowHole" "Bowed" "Brass" "Clarinet"
+          "Flute" "Mandolin" "ModalBar" "Moog"
+          "Saxofony" "Shakers" "Sitar" "StifKarp"
+          "VoicForm" "FM" "BeeThree" "FMVoices"
+          "HevyMetl" "PercFlut" "Rhodey"
+          "TubeBell" "Wurley")
+         'font-lock-type-face)
    (cons (keyword-regexp
-	  ;; Control structures
-	  "if" "else" "while" "until" "for" "repeat"
-	  "break" "continue" "return" "switch"
-	  ;; Class keyword
-	  "class" "extends" "public" "static" "pure"
-	  "this" "super" "interface" "implements"
-	  "protected" "private"
-	  ;; Other keywords
-	  "function" "fun" "spork" "const" "new")
-	 'font-lock-keyword-face)
+          ;; Control structures
+          "if" "else" "while" "until" "for" "repeat"
+          "break" "continue" "return" "switch"
+          ;; Class keyword
+          "class" "extends" "public" "static" "pure"
+          "this" "super" "interface" "implements"
+          "protected" "private"
+          ;; Other keywords
+          "function" "fun" "spork" "const" "new")
+         'font-lock-keyword-face)
    (cons (keyword-regexp
-	  ;; Special values
-	  "now" "true" "false" "maybe"
-	  "null" "NULL" "me" "pi"
-	  ;; Special: default durations
-	  "samp" "ms" "second" "minute" "hour"
-	  "day" "week"
-	  ;; Special: global ugens
-	  "dac" "adc" "blackhole")
-	 'font-lock-keyword-face)
+          ;; Special values
+          "now" "true" "false" "maybe"
+          "null" "NULL" "me" "pi"
+          ;; Special: default durations
+          "samp" "ms" "second" "minute" "hour"
+          "day" "week"
+          ;; Special: global ugens
+          "dac" "adc" "blackhole")
+         'font-lock-keyword-face)
 
    ;; chuck operators and debug print
-   (cons (symbol-regexp "=>" "=<" "!=>" "->"
-			"<-" "+->" "-->" "*->"
-			"/->" "&->" "|->" "^->"
-			">>->" "<<->" "%->" "@=>"
-			"+=>" "-=>" "*=>" "/=>"
-			"&=>" "|=>" "^=>" ">>=>"
-			"<<=>" "%=>" "<<<" ">>>")
-	 'font-lock-operator-face)
+   (cons (symbol-regexp
+          "=>" "=<" "!=>" "->"
+          "<-" "+->" "-->" "*->"
+          "/->" "&->" "|->" "^->"
+          ">>->" "<<->" "%->" "@=>"
+          "+=>" "-=>" "*=>" "/=>"
+          "&=>" "|=>" "^=>" ">>=>"
+          "<<=>" "%=>" "<<<" ">>>")
+         'font-lock-operator-face)
 
    ;;  Upchuck operator. For some reason the regexp applied to other
    ;;  operators don't work
    (cons "\\_<\\(=\\^\\)" 'font-lock-operator-face)
 
    ;; Standard Library functions
-   (list (chuck-library-regexp "Std"
-			       ;; Std
-			       "abs" "fabs" "rand"
-			       "rand2" "randf" "rand2f"
-			       "sgn" "system" "atoi"
-			       "atof" "getenv" "setenv"
-			       "mtof" "ftom" "powtodb"
-			       "rmstodb" "dbtopow" "dbtorms")
-	 1 'font-lock-builtin-face)
+   (list (chuck-library-regexp
+          "Std"
+          ;; Std
+          "abs" "fabs" "rand"
+          "rand2" "randf" "rand2f"
+          "sgn" "system" "atoi"
+          "atof" "getenv" "setenv"
+          "mtof" "ftom" "powtodb"
+          "rmstodb" "dbtopow" "dbtorms")
+         1 'font-lock-builtin-face)
 
-   (list (chuck-library-regexp "Machine"
-			       ;; Machine
-			       "add" "spork" "remove"
-			       "replace" "status" "crash")
-	 1 'font-lock-builtin-face)
+   (list (chuck-library-regexp
+          "Machine"
+          ;; Machine
+          "add" "spork" "remove"
+          "replace" "status" "crash")
+         1 'font-lock-builtin-face)
 
-   (list (chuck-library-regexp "Math"
-			       ;; Math
-			       "sin" "cos" "tan" "asin"
-			       "acos" "atan" "atan2"
-			       "sinh" "cosh" "tanh"
-			       "hypot" "pow" "sqrt" "exp"
-			       "log" "log2" "log10"
-			       "floor" "ceil" "round"
-			       "trunc" "fmod" "remainder"
-			       "min" "max" "nextpow2"
-			       "isinf" "isnan")
-	 1 'font-lock-builtin-face)
+   (list (chuck-library-regexp
+          "Math"
+          ;; Math
+          "sin" "cos" "tan" "asin"
+          "acos" "atan" "atan2"
+          "sinh" "cosh" "tanh"
+          "hypot" "pow" "sqrt" "exp"
+          "log" "log2" "log10"
+          "floor" "ceil" "round"
+          "trunc" "fmod" "remainder"
+          "min" "max" "nextpow2"
+          "isinf" "isnan")
+         1 'font-lock-builtin-face)
 
    ;; Namespaces
    '("\\<\\(Math\\|Std\\|Machine\\)\\>\\." 1 'font-lock-constant-face)
@@ -268,45 +272,45 @@
 
 ;; Indenting for ChucK mode
 (defun chuck-indent-line ()
-  "Indent current line as ChucK code"
+  "Indent current line as ChucK code."
   (interactive)
   (beginning-of-line)
   (if (bobp)  ;; Start of buffer starts out unindented
       (indent-line-to 0)
     (let ((not-indented t)
-		  cur-indent)
+          cur-indent)
       (if (looking-at "[[:blank:]]*}") ; Closing a block
-		  (progn
-			(save-excursion
-			  (forward-line -1)
-			  (setq cur-indent (- (current-indentation) default-tab-width)))
-			(if (< cur-indent 0)
-				(setq cur-indent 0)))
-		(save-excursion
-		  (while not-indented
-			(forward-line -1)
-			(cond ((looking-at ".*{") ; In open block
-				   (setq cur-indent (+ (current-indentation) default-tab-width))
-				   (setq not-indented nil))
-				  ((looking-at "[[:blank:]]*}") ; Closed block on blank line
-				   (setq cur-indent (current-indentation))
-				   (setq not-indented nil))
-				  ((looking-at ".*}") ; Closed block on non-blank line
-				   (setq cur-indent (- (current-indentation) default-tab-width))
-				   (setq not-indented nil))
-				  ((bobp)
-				   (setq not-indented nil))))))
+          (progn
+            (save-excursion
+              (forward-line -1)
+              (setq cur-indent (- (current-indentation) default-tab-width)))
+            (if (< cur-indent 0)
+                (setq cur-indent 0)))
+        (save-excursion
+          (while not-indented
+            (forward-line -1)
+            (cond ((looking-at ".*{") ; In open block
+                   (setq cur-indent (+ (current-indentation) default-tab-width))
+                   (setq not-indented nil))
+                  ((looking-at "[[:blank:]]*}") ; Closed block on blank line
+                   (setq cur-indent (current-indentation))
+                   (setq not-indented nil))
+                  ((looking-at ".*}") ; Closed block on non-blank line
+                   (setq cur-indent (- (current-indentation) default-tab-width))
+                   (setq not-indented nil))
+                  ((bobp)
+                   (setq not-indented nil))))))
       (if cur-indent
-		  (indent-line-to cur-indent)
-		(indent-line-to 0)))))
+          (indent-line-to cur-indent)
+        (indent-line-to 0)))))
 
 ;; Syntax table
 (setq chuck-mode-syntax-table
       (let ((chuck-mode-syntax-table (make-syntax-table)))
-	    (modify-syntax-entry ?_ "_" chuck-mode-syntax-table)
-	    (modify-syntax-entry ?/ ". 12" chuck-mode-syntax-table)
-	    (modify-syntax-entry ?\n ">" chuck-mode-syntax-table)
-	    chuck-mode-syntax-table))
+        (modify-syntax-entry ?_ "_" chuck-mode-syntax-table)
+        (modify-syntax-entry ?/ ". 12" chuck-mode-syntax-table)
+        (modify-syntax-entry ?\n ">" chuck-mode-syntax-table)
+        chuck-mode-syntax-table))
 
 (defun chuck-mode ()
   "Major mode for editing ChucK music/audio scripts."
