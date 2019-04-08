@@ -17,6 +17,11 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
   :type 'string
   :group 'chuck)
 
+(defcustom chuck-port 8888
+  "ChucK server port."
+  :type 'integer
+  :group 'chuck)
+
 (defcustom chuck-process-name "ChucK"
   "ChucK process name."
   :type 'string
@@ -27,11 +32,13 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
   :type 'string
   :group 'chuck)
 
-(defun chuck-cmd (cmd &optional arg)
+(defun build-chuck-cmd (cmd &optional arg)
+  "Build a CMD with optional ARG."
+  (concat chuck-exec " --port:" (number-to-string chuck-port) " " cmd  " " (or arg "")))
+
+(defun send-chuck-cmd (cmd &optional arg)
   "Sends a CMD with optional ARG to chuck."
-  (let ((cmd-line (concat chuck-exec " " cmd  " " (or arg ""))))
-    ;; (print cmd-line)
-    (shell-command cmd-line)))
+  (shell-command (build-chuck-cmd cmd arg)))
 
 (defvar chuck-status-regex
   "^[[:space:]]+\\[shred id\\]:[[:space:]]+\\([[:digit:]]+\\)[[:space:]]+\\[source\\]:[[:space:]]+\\(.*?\\)[[:space:]]\\{2\\}\\[spork time\\]:[[:space:]]\\(.*\\)$")
@@ -48,12 +55,12 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 
 (defun chuck-run ()
   "Start the ChucK VM as an inferior process."
-  (start-process chuck-process-name chuck-buffer-name chuck-exec "--loop"))
+  (start-process-shell-command chuck-process-name chuck-buffer-name (build-chuck-cmd "--loop")))
 
 (defun chuck-kill ()
   "Kill the ChucK VM."
   (when (chuck-is-running?)
-    (chuck-cmd "--kill")
+    (send-chuck-cmd "--kill")
     (with-current-buffer chuck-buffer-name
       (kill-buffer-and-window))))
 
@@ -62,7 +69,7 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
   (let* ((chuck-process (get-process chuck-process-name))
          (output-start (process-mark chuck-process))
          (output-start-position (marker-position output-start)))
-    (chuck-cmd "--status")
+    (send-chuck-cmd "--status")
     (sleep-for 0 100)
     (with-current-buffer (marker-buffer output-start)
       (let* ((output-end (process-mark chuck-process))
@@ -74,22 +81,22 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 (defun chuck-add (filename)
   "Add a FILENAME as a shred to the ChucK VM."
   (ensure-chuck-is-running)
-  (chuck-cmd "+" filename))
+  (send-chuck-cmd "+" filename))
 
 (defun chuck-remove-shred (shred)
   "Remove a SHRED associated with current buffer."
   (ensure-chuck-is-running)
-  (chuck-cmd "-" shred))
+  (send-chuck-cmd "-" shred))
 
 (defun chuck-remove-all ()
   "Remove all currently running shreds."
   (ensure-chuck-is-running)
-  (chuck-cmd "--remove.all"))
+  (send-chuck-cmd "--remove.all"))
 
 (defun chuck-replace-shred (shred filename)
   "Replace a SHRED with contents of FILENAME."
   (ensure-chuck-is-running)
-  (chuck-cmd "=" (concat shred " " filename)))
+  (send-chuck-cmd "=" (concat shred " " filename)))
 
 (defun chuck-parse-status (status)
   "Parse ChucK STATUS."
