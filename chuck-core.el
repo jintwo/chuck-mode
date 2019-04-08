@@ -105,12 +105,12 @@ to the full path of `chuck' (i.e `c:\\chuck\\bin\\chuck.exe')"
 
 (defun chuck-get-shred-by-source (source)
   "Get shred id by it's SOURCE."
-  (when-let ((entry (-first (lambda (e) (string= (plist-get e :source) source)) (chuck-status))))
+  (-when-let (entry (-first (lambda (e) (string= (plist-get e :source) source)) (chuck-status)))
     (plist-get entry :shred)))
 
 (defun chuck-get-source-by-shred (shred)
   "Get source by SHRED id."
-  (when-let ((entry (-first (lambda (e) (string= (plist-get e :shred) shred)) (chuck-status))))
+  (-when-let (entry (-first (lambda (e) (string= (plist-get e :shred) shred)) (chuck-status)))
     (plist-get entry :source)))
 
 (provide 'chuck-core)
